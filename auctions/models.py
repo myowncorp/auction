@@ -6,11 +6,11 @@ class User(AbstractUser):
     pass
 
 class Listing(models.Model):
-    title = models.CharField(length=64)
-    description = models.CharField(length=500)
-    start_bid = models.IntegerField
+    title = models.CharField(max_length=64)
+    description = models.CharField(max_length=500)
+    start_bid = models.IntegerField()
     image = models.URLField(blank=True)
-    category = models.CharField(length=50)
+    category = models.CharField(max_length=50)
     
     
 class Bid(models.Model):
