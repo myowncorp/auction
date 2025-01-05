@@ -16,7 +16,11 @@ class Listing(models.Model):
     start_bid = models.IntegerField(default=0)
     image = models.URLField(blank=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+      
+    def __str__(self):
+        return f"{self.id}: {self.title} - {self.description} for {self.start_bid} in {self.category} has image link {self.image}"
     
+
 ### TO DO
 class Bid(models.Model):
     pass
