@@ -65,6 +65,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def create_listing(request):
+
     if request.method == "POST":
         f = ListingForm(request.POST)
         print(f"{f}")
@@ -75,3 +76,12 @@ def create_listing(request):
         return render(request, 'auctions/createlisting.html', {
             'form': ListingForm()
         })
+        
+        
+        
+def listing(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+    
+    return render(request, 'auctions/listing.html',{
+        'listing': listing
+    })
