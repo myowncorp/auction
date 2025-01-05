@@ -2,6 +2,7 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
-    TODO
+    {% for listing in listings %}
+            <li>Listing: {{ listing.id }} - {{ listing.description }} for bid price: {{ Listing.start_bid }} See image here(if available): {% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{listing.category}}
+        {% endfor %}
 {% endblock %}
