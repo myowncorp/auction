@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing
+from .models import User, Listing, WatchList
 from .forms import ListingForm
 
 
@@ -87,5 +87,7 @@ def listing(request, listing_id):
     })
     
 def watch_list(request, user):
+    ### TO DO - Need to add a remove button to remove an item from the watch list
     # need to pass the users watch list in
-    return render(request, 'auctions/watchlist.html',{})
+    watchlist = WatchList.objects.filter(user_id=request.user.id)
+    return render(request, 'auctions/watchlist.html',{'watchlist': watchlist})

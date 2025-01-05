@@ -33,6 +33,10 @@ class Comments(models.Model):
     pass
 
 class WatchList(models.Model):
-    ### TO DO - this needs to be tied to the user
-    ### TO DO - also needs to reference the Listing id
-    pass
+    # Tie the user to the WatchList, and the Watchlist to the user
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owner")
+    # Tie the listing to the WatchList and the Watchlist to the Listing 
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='list_item')
+    
+    def __str__(self):
+        return f"User: {self.user} & Listing: {self.listing}"
