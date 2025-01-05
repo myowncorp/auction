@@ -85,3 +85,7 @@ def listing(request, listing_id):
     return render(request, 'auctions/listing.html',{
         'listing': listing
     })
+    
+def watch_list(request, user):
+    # need to pass the users watch list in
+    return render(request, 'auctions/watchlist.html',{})
