@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout, admin
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from .models import User, Listing, WatchList
@@ -103,4 +103,19 @@ def watch_list(request, user):
     ### TO DO - Need to add a remove button to remove an item from the watch list
     # need to pass the users watch list in
     watchlist = WatchList.objects.filter(user_id=request.user.id)
+    
+    if request.method== 'POST':
+        # capture the value of the listing assigned to that removal button
+        # don't confuse listing_id with the model Listing, this is a listing in the WatchList
+        watchlist_id = request.POST.get('watchlist_id')
+        # get the WatchList with that exact id
+        watchlist = WatchList.objects.get(id=watchlist_id)
+        print(f'{watchlist.user.id}')
+        watchlist.delete()
+        if watchlist_id: 
+            ### TO DO - Figure out why its user=request.user.username and not watchlist=watchlist ie(why pass the user and not the watchlist)
+            return redirect('watch_list', user=request.user.username)
+        else:
+            return redirect('watchlist')
+    
     return render(request, 'auctions/watchlist.html',{'watchlist': watchlist})
