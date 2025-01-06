@@ -19,15 +19,19 @@ class Listing(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     def __str__(self):
         return f"{self.id}: {self.title} - {self.description} for {self.start_bid} in {self.category} has image link {self.image}"
-    
+   
+    def get_highest_bid(self):
+        # This retrieves the highest bid amount related to the listing
+        highest_bid = self.bid.order_by('-amount').first()
+        return highest_bid.amount if highest_bid else None
 
-### TO DO
 class Bid(models.Model):
     bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bid')
+    # if it's saved here, it has to be the highest bid.
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='bid')
     amount = models.IntegerField()
     def __str__(self):
-        return f"{Bid.bidder}: bid {Bid.amount} on {Bid.listing}"
+        return f"{self.bidder}: bid {self.amount} on {self.listing}"
 
 ### TO DO
 class Comments(models.Model):

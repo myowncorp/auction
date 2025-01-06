@@ -5,7 +5,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import User, Listing, WatchList
+
+from .models import User, Listing, WatchList, Bid
 from .forms import ListingForm, BidForm
 
 
@@ -100,6 +101,24 @@ def listing(request, listing_id):
             else:
                 wl_listing.save()   
     
+    
+        if action =='bid':
+            # This will pull all the relevant data
+            bid = BidForm(request.POST)
+          
+            if bid.is_valid():
+                amount = bid.cleaned_data['amount']
+            
+                # if the amount bid is less then the start_bid(Listing) or the highest bid, return an error to the user
+                if amount <= listing.start_bid or amount <= listing.get_highest_bid():
+                    pass
+                # if it passes those 2 checks above, it's okay to save
+                else:
+                    bidder = request.user
+                    print(f"The user of this bid: {bidder} on {listing} for {amount}")
+                    bid = Bid(bidder=bidder, listing=listing, amount = amount)
+                    bid.save()
+            
     return render(request, 'auctions/listing.html',{
         'listing': listing,
         'bidform': BidForm()
