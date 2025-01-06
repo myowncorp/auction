@@ -4,12 +4,6 @@
     <h2>Active Listings</h2>
     {% for listing in listings %}
             <li><a href={% url 'listing' listing.id %}> Listing: {{ listing.id }} </a> - {{ listing.description }} for bid price: ${{ listing.start_bid }} See image here(if available): {% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{listing.category}}
-                <form method='post' action='{% url 'index' %}'>
-                    {% csrf_token %}
-                    <input type="hidden" name="listing_id" value='{{ listing.id }}'>
-                    <button type="submit">
-                         Add {{listing.title}} to watchlist
-                    </button>
             </li>
         {% endfor %}    
 {% endblock %}

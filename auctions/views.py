@@ -9,7 +9,7 @@ from .forms import ListingForm
 
 
 def index(request):
-    return render(request, "auctions/index.html",
+    return render(request, "auctions/index.html", 
                   {'listings': Listing.objects.all()})
 
 
@@ -81,6 +81,19 @@ def create_listing(request):
         
 def listing(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
+    
+    if request.method=='POST':
+        # capture the value submitted through the <input> tag
+        listing_id=request.POST.get('listing_id')
+        # Fetch the listing that the user wanted to add to their watchlist through the database
+        user = request.user
+        print(f"Listing ID: {listing_id} and User: {user}")
+        wl_listing=WatchList(user=user, listing=Listing.objects.get(id=listing_id))
+        # check to see if it already exists. We don't want duplicate items.
+        if WatchList.objects.filter(user=user, listing_id=listing_id).exists():
+            print("Listing already added to the watchlist")
+        else:
+            wl_listing.save()   
     
     return render(request, 'auctions/listing.html',{
         'listing': listing
