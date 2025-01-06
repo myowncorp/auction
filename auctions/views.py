@@ -111,8 +111,10 @@ def listing(request, listing_id):
             
                 # if the amount bid is less then the start_bid(Listing) or the highest bid, return an error to the user
                 if amount <= listing.start_bid or amount <= listing.get_highest_bid():
-                    pass
-                # if it passes those 2 checks above, it's okay to save
+                    return render(request, 'auctions/listing.html', {
+                        'message': "Bid must be greater than starting price and highest bid",
+                        'listing': listing,
+                        'bidform': BidForm()})
                 else:
                     bidder = request.user
                     print(f"The user of this bid: {bidder} on {listing} for {amount}")
