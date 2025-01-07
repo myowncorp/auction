@@ -66,12 +66,13 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+@login_required
 def create_listing(request):
 
     if request.method == "POST":
         f = ListingForm(request.POST)
-        print(f"{f}")
         if f.is_valid:
+            f.instance.owner = request.user
             f.save()
         return HttpResponseRedirect(reverse('index'))
     else:
@@ -82,16 +83,18 @@ def create_listing(request):
         
 @login_required  
 def listing(request, listing_id):
-    ### TO DO - IF THE USER IS SIGNED IN AND IS THE ONE WHO CREATED THE LISTING THEY SHOULD BE ABLE TO CLOSE THE AUCTION
     ### IF THE PERSON WITH THE HIGHEST BID VIEWS THE PAGE AFTER IT'S CLOSED THEY SHOULD BE ABLE TO SEE THAT THEY HAVE WON THE BID
     listing = Listing.objects.get(id=listing_id)
-    
+    # get the highest bid object
+    highest_bid = listing.bid.order_by('-amount').first()
+    highest_bidder= highest_bid.bidder
+    print(f"This is the highest bidder {highest_bid.bidder} \n")
     if request.method=='POST':
         
         # get the value of the action, we are using the value of the <input> to signify which function we should use
         action = request.POST.get('action')
         if action == 'add':
-            # capture the value submitted through the <input> tag
+            # capture the value= submitted through the <input name=listing_id>
             listing_id=request.POST.get('listing_id')
             # Fetch the listing that the user wanted to add to their watchlist through the database
             user = request.user
@@ -110,7 +113,6 @@ def listing(request, listing_id):
           
             if bid.is_valid():
                 amount = bid.cleaned_data['amount']
-            
                 # if the amount bid is less then the start_bid(Listing) or the highest bid, return an error to the user
                 if amount <= listing.start_bid or amount <= listing.get_highest_bid():
                     return render(request, 'auctions/listing.html', {
@@ -120,10 +122,21 @@ def listing(request, listing_id):
                 else:
                     bidder = request.user
                     print(f"The user of this bid: {bidder} on {listing} for {amount}")
-                    bid = Bid(bidder=bidder, listing=listing, amount = amount)
+                    bid = Bid(bidder=bidder, listing=listing, amount=amount)
                     bid.save()
-            
+     
+     
+        if action == 'close':
+            # capture the value= submitted through the <input name=listing_id> same as in add
+            listing_id=request.POST.get('listing_id')        
+            listing=Listing.objects.get(id=listing_id)
+            # set is_active to False, this way we can distinguish
+            listing.is_active= not listing.is_active
+            listing.save()
+            return redirect('index')
+        
     return render(request, 'auctions/listing.html',{
+        'highest_bidder': highest_bidder,
         'listing': listing,
         'bidform': BidForm()
     })

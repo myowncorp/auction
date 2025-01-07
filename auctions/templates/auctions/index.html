@@ -3,13 +3,15 @@
 {% block body %}
     <h2>Active Listings</h2>
     {% for listing in listings %}
+        {% if listing.is_active %}
             <li><a href={% url 'listing' listing.id %}> Listing: {{ listing.id }} </a> - {{ listing.description }} for bid price:
                 {% if listing.get_highest_bid %}
                     ${{listing.get_highest_bid}}
                 {% else %}
                     ${{ listing.start_bid }}
                 {% endif %}
-                    See image here(if available): {% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{listing.category}}
+                    See image here(if available): {% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{listing.category}} listed by {{listing.owner}}
             </li>
-        {% endfor %}    
+        {% endif %}
+    {% endfor %} 
 {% endblock %}
