@@ -82,6 +82,8 @@ def create_listing(request):
         
 @login_required  
 def listing(request, listing_id):
+    ### TO DO - IF THE USER IS SIGNED IN AND IS THE ONE WHO CREATED THE LISTING THEY SHOULD BE ABLE TO CLOSE THE AUCTION
+    ### IF THE PERSON WITH THE HIGHEST BID VIEWS THE PAGE AFTER IT'S CLOSED THEY SHOULD BE ABLE TO SEE THAT THEY HAVE WON THE BID
     listing = Listing.objects.get(id=listing_id)
     
     if request.method=='POST':
@@ -146,4 +148,4 @@ def watch_list(request, user):
             return redirect('watchlist')
         
     
-    return render(request, 'auctions/watchlist.html',{'watchlist': watchlist})
+    return render(request, 'auctions/watchlist.html', {'watchlist': watchlist,})
