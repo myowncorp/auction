@@ -143,7 +143,7 @@ def listing(request, listing_id):
             listing.save()
             return redirect('index')
 
-        if action == 'comment:':
+        if action == 'comment':
             print("the action is equal to comment")
             print('Here is the comment form data \n')
             print(CommentForm(request.POST))
