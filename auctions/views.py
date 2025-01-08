@@ -6,12 +6,12 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 
-from .models import User, Listing, WatchList, Bid
-from .forms import ListingForm, BidForm
+from .models import User, Listing, WatchList, Bid, Comment
+from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
-    return render(request, "auctions/index.html", 
+    return render(request, "auctions/index.html",
                   {'listings': Listing.objects.all()})
 
 
@@ -66,6 +66,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 @login_required
 def create_listing(request):
 
@@ -79,38 +80,45 @@ def create_listing(request):
         return render(request, 'auctions/createlisting.html', {
             'form': ListingForm()
         })
-        
-        
-@login_required  
+
+
+@login_required
 def listing(request, listing_id):
-    ### IF THE PERSON WITH THE HIGHEST BID VIEWS THE PAGE AFTER IT'S CLOSED THEY SHOULD BE ABLE TO SEE THAT THEY HAVE WON THE BID
     listing = Listing.objects.get(id=listing_id)
+    # get the comments based on the listing_id
+    comments = Comment.objects.filter(listing=listing)
+    print(f'{comments}')
+    
+    print(f'{comments}')
     # get the highest bid object
     highest_bid = listing.bid.order_by('-amount').first()
-    highest_bidder= highest_bid.bidder
+    highest_bidder = highest_bid.bidder
     print(f"This is the highest bidder {highest_bid.bidder} \n")
-    if request.method=='POST':
-        
+    if request.method == 'POST':
+
         # get the value of the action, we are using the value of the <input> to signify which function we should use
         action = request.POST.get('action')
+        print(f'{action}')
+        print(f'{action == 'comment'}')
+        print(f'{request.POST}')
         if action == 'add':
             # capture the value= submitted through the <input name=listing_id>
-            listing_id=request.POST.get('listing_id')
+            listing_id = request.POST.get('listing_id')
             # Fetch the listing that the user wanted to add to their watchlist through the database
             user = request.user
             print(f"Listing ID: {listing_id} and User: {user}")
-            wl_listing=WatchList(user=user, listing=Listing.objects.get(id=listing_id))
+            wl_listing = WatchList(
+                user=user, listing=Listing.objects.get(id=listing_id))
             # check to see if it already exists. We don't want duplicate items.
             if WatchList.objects.filter(user=user, listing_id=listing_id).exists():
                 print("Listing already added to the watchlist")
             else:
-                wl_listing.save()   
-    
-    
-        if action =='bid':
+                wl_listing.save()
+
+        if action == 'bid':
             # This will pull all the relevant data
             bid = BidForm(request.POST)
-          
+
             if bid.is_valid():
                 amount = bid.cleaned_data['amount']
                 # if the amount bid is less then the start_bid(Listing) or the highest bid, return an error to the user
@@ -121,31 +129,48 @@ def listing(request, listing_id):
                         'bidform': BidForm()})
                 else:
                     bidder = request.user
-                    print(f"The user of this bid: {bidder} on {listing} for {amount}")
+                    print(f"The user of this bid: {
+                          bidder} on {listing} for {amount}")
                     bid = Bid(bidder=bidder, listing=listing, amount=amount)
                     bid.save()
-     
-     
+
         if action == 'close':
             # capture the value= submitted through the <input name=listing_id> same as in add
-            listing_id=request.POST.get('listing_id')        
-            listing=Listing.objects.get(id=listing_id)
+            listing_id = request.POST.get('listing_id')
+            listing = Listing.objects.get(id=listing_id)
             # set is_active to False, this way we can distinguish
-            listing.is_active= not listing.is_active
+            listing.is_active = not listing.is_active
             listing.save()
             return redirect('index')
-        
-    return render(request, 'auctions/listing.html',{
+
+        if action == 'comment:':
+            print("the action is equal to comment")
+            print('Here is the comment form data \n')
+            print(CommentForm(request.POST))
+            c = CommentForm(request.POST)
+            if c.is_valid():
+                c = c.save(commit=False)
+                # set the comment.user to request.user
+                c.user = request.user
+                # set comment.listing to listing
+                c.listing = listing
+                # we have the comment because we passed it is as a model form so comment.comment is already set
+                c.save()
+                return redirect('listing', listing_id=listing.id)
+
+    return render(request, 'auctions/listing.html', {
         'highest_bidder': highest_bidder,
         'listing': listing,
-        'bidform': BidForm()
+        'bidform': BidForm(),
+        'commentform': CommentForm(),
+        'comments': comments
     })
-    
+
+
 def watch_list(request, user):
-    ### TO DO - Need to add a remove button to remove an item from the watch list
     # need to pass the users watch list in
     watchlist = WatchList.objects.filter(user_id=request.user.id)
-    
+
     if request.method == 'POST':
         # capture the value of the listing assigned to that removal button
         # don't confuse listing_id with the model Listing, this is a listing in the WatchList
@@ -154,11 +179,10 @@ def watch_list(request, user):
         watchlist = WatchList.objects.get(id=watchlist_id)
         print(f'{watchlist.user.id}')
         watchlist.delete()
-        if watchlist_id: 
-            ### TO DO - Figure out why its user=request.user.username and not watchlist=watchlist ie(why pass the user and not the watchlist)
+        if watchlist_id:
+            # TO DO - Figure out why its user=request.user.username and not watchlist=watchlist ie(why pass the user and not the watchlist)
             return redirect('watch_list', user=request.user.username)
         else:
             return redirect('watchlist')
-        
-    
-    return render(request, 'auctions/watchlist.html', {'watchlist': watchlist,})
+
+    return render(request, 'auctions/watchlist.html', {'watchlist': watchlist, })

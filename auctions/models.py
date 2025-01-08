@@ -36,9 +36,13 @@ class Bid(models.Model):
     def __str__(self):
         return f"{self.bidder}: bid {self.amount} on {self.listing}"
 
-### TO DO
-class Comments(models.Model):
-    pass
+
+class Comment(models.Model):
+    # the listing the comment goes too
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comment', null= True)
+    # the user that made the comment
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment', null=True)
+    comment = models.CharField(max_length=250, default='')
 
 class WatchList(models.Model):
     # Tie the user to the WatchList, and the Watchlist to the user
