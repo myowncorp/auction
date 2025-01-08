@@ -87,20 +87,14 @@ def listing(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
     # get the comments based on the listing_id
     comments = Comment.objects.filter(listing=listing)
-    print(f'{comments}')
-    
-    print(f'{comments}')
+
     # get the highest bid object
     highest_bid = listing.bid.order_by('-amount').first()
     highest_bidder = highest_bid.bidder
-    print(f"This is the highest bidder {highest_bid.bidder} \n")
     if request.method == 'POST':
 
         # get the value of the action, we are using the value of the <input> to signify which function we should use
         action = request.POST.get('action')
-        print(f'{action}')
-        print(f'{action == 'comment'}')
-        print(f'{request.POST}')
         if action == 'add':
             # capture the value= submitted through the <input name=listing_id>
             listing_id = request.POST.get('listing_id')
@@ -144,8 +138,6 @@ def listing(request, listing_id):
             return redirect('index')
 
         if action == 'comment':
-            print("the action is equal to comment")
-            print('Here is the comment form data \n')
             print(CommentForm(request.POST))
             c = CommentForm(request.POST)
             if c.is_valid():
@@ -180,7 +172,6 @@ def watch_list(request, user):
         print(f'{watchlist.user.id}')
         watchlist.delete()
         if watchlist_id:
-            # TO DO - Figure out why its user=request.user.username and not watchlist=watchlist ie(why pass the user and not the watchlist)
             return redirect('watch_list', user=request.user.username)
         else:
             return redirect('watchlist')
