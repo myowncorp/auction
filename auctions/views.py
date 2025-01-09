@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 
 
 from .models import User, Listing, WatchList, Bid, Comment
-from .forms import ListingForm, BidForm, CommentForm
+from .forms import ListingForm, BidForm, CommentForm, CATEGORY_CHOICES
 
 
 def index(request):
@@ -89,8 +89,12 @@ def listing(request, listing_id):
     comments = Comment.objects.filter(listing=listing)
 
     # get the highest bid object
+    
     highest_bid = listing.bid.order_by('-amount').first()
-    highest_bidder = highest_bid.bidder
+    try:
+        highest_bidder = highest_bid.bidder
+    except:
+        highest_bidder = None
     if request.method == 'POST':
 
         # get the value of the action, we are using the value of the <input> to signify which function we should use
@@ -177,3 +181,33 @@ def watch_list(request, user):
             return redirect('watchlist')
 
     return render(request, 'auctions/watchlist.html', {'watchlist': watchlist, })
+
+
+
+def categories(request):
+    return render(request, 'auctions/categories.html',
+                  {'categories': CATEGORY_CHOICES })
+    
+    
+def category(request, category):
+    # variables:
+    #   category_label is the 2nd part of CATEGORY_CHOCIES tuples, used for generating the url
+    #   category_key   is the 1st of the tuple, used for querying the database
+    
+    # get all the listings in that category
+
+    print(f'key: {category}\n')
+          
+    listings_in_category = Listing.objects.filter(category=category, is_active=True)
+    print(listings_in_category)
+    
+    # lets get the user friendly name of the category since that is displayed
+    cats = dict(CATEGORY_CHOICES) # convert it to a dict
+    cat_label = cats.get(category)            # get the category label with key category see CATEGORY_CHOICES
+    
+    
+    
+    return render(request, 'auctions/category.html', {
+        'listings': listings_in_category,
+        'cat_label': cat_label
+    })

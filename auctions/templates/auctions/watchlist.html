@@ -1,0 +1,32 @@
+{% extends "auctions/layout.html" %}
+
+
+<title>
+	{% block title %}
+		WatchList
+	{% endblock %}
+</title>
+
+{% block body %}
+<h1> Your WatchList </h1>
+{% for listing in watchlist %}
+
+<!-- listing.listing references the actual listing referenced by the WatchList.listing for example listing.id gives the id of that listing in WatchList not in listing-->
+<li><a href= {% url 'listing' listing.listing.id %}> Listing ID: {{ listing.listing.id }} </a> Listing Title: {{listing.listing.title}} 
+
+	{% if listing.listing.get_highest_bid %}
+        ${{listing.listing.get_highest_bid}}
+    {% else %}
+		${{ listing.listing.start_bid }}
+    {% endif %}
+</li>
+<form method='post' action='{% url 'watch_list' listing.id %}'>
+	{% csrf_token %}
+	<input type="hidden" name="watchlist_id" value='{{ listing.id }}'>
+	<button type="submit">
+		Remove {{listing.title}} from watchlist
+	</button>
+</form>
+
+{% endfor %}
+{% endblock %}

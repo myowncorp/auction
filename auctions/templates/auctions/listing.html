@@ -1,0 +1,71 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+	<form method='post' action='{% url 'listing' listing.id %}'>
+		{% csrf_token %}
+		<input type="hidden" name="action" value="add">
+		<input type="hidden" name="listing_id" value='{{ listing.id }}'>
+		<button type="submit">
+			Add {{listing.title}} to watchlist
+		</button>
+	</form>
+
+	{% if request.user == listing.owner %}
+	<form method='post' action='{% url 'listing' listing.id %}'>
+		{% csrf_token %}
+		<input type="hidden" name="action" value="close">
+		<input type="hidden" name="listing_id" value='{{ listing.id }}'>
+		<button type="submit">
+			close Auction for: {{listing.title}}
+		</button>
+	</form>
+	{% endif %}
+
+    <h2>Listing {{listing.id}} </h2>
+	<h2>Owner: {{ listing.owner }} </h2>
+    <h3>Description: {{ listing.description }} </h3>
+	<h3>Starting Price: ${{ listing.start_bid }}</h3>
+	<h3>Highest Bid:  ${{ listing.get_highest_bid }} </h3>
+	<h4> See image here(if available): </h4>
+
+	{% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{listing.category}}
+	<!-- Provide the error message we created -->
+	{% if message %}
+		<div>
+			<b style='color: red'> BID NOT ACCEPTED: {{ message }} </b>
+		</div>
+	{% endif %}
+
+	{% if listing.is_active %}
+		<form method='post' action='{% url 'listing' listing.id %}'>
+			{% csrf_token %}
+			<input type="hidden" name="action" value="bid">
+			{{ bidform }}
+			<button type="submit">
+				bid on {{listing.title}}
+			</button>
+			(Must be greater than start price or highest bid)
+		</form>
+		<!-- get the highest bid as an object, like in get_highest_bid, but get the full object and find the user -->
+	{% elif highest_bidder == request.user %}
+		<h1 style='color: red	'> YOU'VE WON THIS AUCTION </h1>		
+	{% endif %}
+
+
+	<form method='post' action='{% url 'listing' listing.id %}'>
+		{% csrf_token %}
+		<input type="hidden" name="action" value="comment">
+		{{ commentform}}
+		<button type="submit">
+			Submit comment
+		</button>
+	</form>
+
+	{% for comment in comments %}
+		<h4> Comment From User: {{comment.user}} </h4>
+		<p style='border-style: dotted'> {{comment.comment}} </p>
+	{% endfor %}
+
+
+
+{% endblock %}

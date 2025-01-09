@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+<title> category </title>
+{% block body %}
+    <h2>Active Listings for {{ category }} </h2>
+
+
+	{% for listing in listings %}
+		<li><a href={% url 'listing' listing.id %}> Listing: {{ listing.id }} </a> - {{ listing.description }} for bid price:
+                {% if listing.get_highest_bid %}
+                    ${{listing.get_highest_bid}}
+                {% else %}
+                    ${{ listing.start_bid }}
+                {% endif %}
+                    See image here(if available): {% if listing.image %}<a href="{{ listing.image}}">image </a>{% endif %} in category {{cat_label}} listed by {{listing.owner}}
+	{% endfor %}
+{% endblock %}
